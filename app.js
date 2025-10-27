@@ -18,27 +18,45 @@ class ConectaAutismo {
             // Mostrar splash screen imediatamente
             this.showSplashScreen();
             
+            // Log para debug
+            console.log('Iniciando aplicação ConectaAutismo...');
+            
             // Inicializar Supabase com timeout
+            console.log('Inicializando Supabase...');
             this.supabaseReady = await Promise.race([
                 supabaseClient.init(),
                 new Promise(resolve => setTimeout(() => resolve(false), 5000)) // 5s timeout
             ]);
             
+            console.log('Supabase ready:', this.supabaseReady);
+            
             // Carregar dados (com fallback)
+            console.log('Carregando dados iniciais...');
             await this.loadInitialData();
             
             // Verificar autenticação
+            console.log('Verificando autenticação...');
             this.checkAuthentication();
             this.setupEventListeners();
+            
+            console.log('Aplicação inicializada com sucesso!');
             
         } catch (error) {
             console.warn('Erro na inicialização, usando modo offline:', error);
             this.supabaseReady = false;
             
-            // Carregar dados offline
-            await this.loadInitialData();
-            this.checkAuthentication();
-            this.setupEventListeners();
+            try {
+                // Carregar dados offline
+                await this.loadInitialData();
+                this.checkAuthentication();
+                this.setupEventListeners();
+                console.log('Aplicação inicializada em modo offline');
+            } catch (fallbackError) {
+                console.error('Erro crítico na inicialização:', fallbackError);
+                // Forçar exibição da tela de login mesmo com erro
+                this.showLoginScreen();
+                this.setupEventListeners();
+            }
         }
     }
 
@@ -419,43 +437,123 @@ class ConectaAutismo {
     }
 
     showMainApp() {
+        console.log('Iniciando carregamento da aplicação principal...');
+        
         try {
             // Hide splash and login screens
             const splashScreen = document.getElementById('splash-screen');
             const loginScreen = document.getElementById('login-screen');
             const mainApp = document.getElementById('main-app');
 
+            console.log('Elementos encontrados:', {
+                splashScreen: !!splashScreen,
+                loginScreen: !!loginScreen,
+                mainApp: !!mainApp
+            });
+
             if (splashScreen) splashScreen.style.display = 'none';
             if (loginScreen) loginScreen.style.display = 'none';
-            if (mainApp) mainApp.style.display = 'block';
-
-            // Setup profile event listeners
-            this.setupProfileEventListeners();
-
-            // Load user profile if elements exist
-            const profileForm = document.getElementById('profile-form');
-            const profileName = document.getElementById('profile-name');
-            const profileEmail = document.getElementById('profile-email');
-
-            if (profileForm && profileName && profileEmail) {
-                this.loadUserProfile();
+            if (mainApp) {
+                mainApp.style.display = 'block';
+                console.log('Interface principal exibida');
+            } else {
+                console.error('Elemento main-app não encontrado!');
+                // Tentar mostrar pelo menos a tela de login
+                if (loginScreen) {
+                    loginScreen.style.display = 'block';
+                    console.log('Fallback: exibindo tela de login');
+                }
+                return;
             }
 
-            // Update user name in header
-            const userNameElement = document.getElementById('user-name');
-            if (userNameElement && this.currentUser) {
-                userNameElement.textContent = this.currentUser.name || this.currentUser.username;
+            // Setup profile event listeners (com tratamento individual)
+            try {
+                this.setupProfileEventListeners();
+                console.log('Event listeners do perfil configurados');
+            } catch (error) {
+                console.warn('Erro ao configurar event listeners do perfil:', error);
             }
 
-            // Load initial content
-            this.loadCategoryIcons();
-            this.loadIconsManagement();
-            this.loadSettingsValues();
+            // Load user profile if elements exist (com tratamento individual)
+            try {
+                const profileForm = document.getElementById('profile-form');
+                const profileName = document.getElementById('profile-name');
+                const profileEmail = document.getElementById('profile-email');
 
-            console.log('Main app loaded successfully');
+                if (profileForm && profileName && profileEmail) {
+                    this.loadUserProfile();
+                    console.log('Perfil do usuário carregado');
+                }
+            } catch (error) {
+                console.warn('Erro ao carregar perfil do usuário:', error);
+            }
+
+            // Update user name in header (com tratamento individual)
+            try {
+                const userNameElement = document.getElementById('user-name');
+                if (userNameElement && this.currentUser) {
+                    userNameElement.textContent = this.currentUser.name || this.currentUser.username;
+                    console.log('Nome do usuário atualizado no cabeçalho');
+                }
+            } catch (error) {
+                console.warn('Erro ao atualizar nome do usuário:', error);
+            }
+
+            // Load initial content (com tratamento individual para cada método)
+            try {
+                this.loadCategoryIcons();
+                console.log('Ícones de categoria carregados');
+            } catch (error) {
+                console.warn('Erro ao carregar ícones de categoria:', error);
+            }
+
+            try {
+                this.loadIconsManagement();
+                console.log('Gerenciamento de ícones carregado');
+            } catch (error) {
+                console.warn('Erro ao carregar gerenciamento de ícones:', error);
+            }
+
+            try {
+                this.loadSettingsValues();
+                console.log('Configurações carregadas');
+            } catch (error) {
+                console.warn('Erro ao carregar configurações:', error);
+            }
+
+            console.log('Aplicação principal carregada com sucesso!');
+            
         } catch (error) {
-            console.error('Erro ao carregar aplicação principal:', error);
-            alert('Erro ao carregar a aplicação. Recarregue a página.');
+            console.error('Erro crítico ao carregar aplicação principal:', error);
+            
+            // Em vez de mostrar alert, tentar recuperação
+            try {
+                // Tentar mostrar pelo menos a interface básica
+                const mainApp = document.getElementById('main-app');
+                const loginScreen = document.getElementById('login-screen');
+                
+                if (mainApp) {
+                    mainApp.style.display = 'block';
+                    console.log('Recuperação: interface principal exibida em modo básico');
+                } else if (loginScreen) {
+                    loginScreen.style.display = 'block';
+                    console.log('Recuperação: voltando para tela de login');
+                } else {
+                    // Último recurso: recriar elementos básicos
+                    document.body.innerHTML = `
+                        <div style="padding: 20px; text-align: center; font-family: Arial, sans-serif;">
+                            <h2>ConectaAutismo</h2>
+                            <p>Aplicação em modo de recuperação</p>
+                            <button onclick="location.reload()">Recarregar Página</button>
+                        </div>
+                    `;
+                    console.log('Recuperação: modo de emergência ativado');
+                }
+            } catch (recoveryError) {
+                console.error('Erro na recuperação:', recoveryError);
+                // Só agora mostrar mensagem ao usuário
+                alert('Erro crítico na aplicação. Por favor, recarregue a página.');
+            }
         }
     }
 

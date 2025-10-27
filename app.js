@@ -2,24 +2,114 @@
 class ConectaAutismo {
     constructor() {
         this.currentCategory = 'sentimentos';
-        this.settings = this.loadSettings();
-        this.usage = this.loadUsage();
-        this.icons = this.loadIcons();
+        this.settings = {};
+        this.usage = {};
+        this.icons = {};
         this.speechSynthesis = window.speechSynthesis;
         this.currentUser = null;
         this.users = [];
+        this.supabaseReady = false;
         
         this.init();
     }
 
-    init() {
-        this.users = this.loadUsers(); // Load users first
-        this.checkAuthentication();
-        this.setupEventListeners();
-        // Profile setup will be called after authentication
+    async init() {
+        try {
+            // Mostrar splash screen imediatamente
+            this.showSplashScreen();
+            
+            // Inicializar Supabase com timeout
+            this.supabaseReady = await Promise.race([
+                supabaseClient.init(),
+                new Promise(resolve => setTimeout(() => resolve(false), 5000)) // 5s timeout
+            ]);
+            
+            // Carregar dados (com fallback)
+            await this.loadInitialData();
+            
+            // Verificar autenticação
+            this.checkAuthentication();
+            this.setupEventListeners();
+            
+        } catch (error) {
+            console.warn('Erro na inicialização, usando modo offline:', error);
+            this.supabaseReady = false;
+            
+            // Carregar dados offline
+            await this.loadInitialData();
+            this.checkAuthentication();
+            this.setupEventListeners();
+        }
     }
 
-    // Profile Management Methods
+    async loadInitialData() {
+        try {
+            // Carregar usuários
+            if (this.supabaseReady) {
+                this.users = await supabaseClient.loadUsers();
+            } else {
+                // Fallback para localStorage
+                this.users = JSON.parse(localStorage.getItem('conecta_users') || '[]');
+                if (this.users.length === 0) {
+                    // Usuário padrão se não há usuários
+                    this.users = [{
+                        id: 1,
+                        username: 'admin',
+                        password: 'admin123',
+                        name: 'Administrador',
+                        email: 'admin@conecta.com',
+                        type: 'admin',
+                        active: true
+                    }];
+                    localStorage.setItem('conecta_users', JSON.stringify(this.users));
+                }
+            }
+            
+            // Se há usuário logado, carregar seus dados
+            if (this.currentUser) {
+                if (this.supabaseReady) {
+                    this.settings = await supabaseClient.loadSettings(this.currentUser.username);
+                } else {
+                    this.settings = JSON.parse(localStorage.getItem(`conecta_settings_${this.currentUser.username}`) || '{}');
+                }
+                this.icons = this.loadIcons(); // Manter localStorage por enquanto
+                this.usage = this.loadUsage(); // Manter localStorage por enquanto
+            } else {
+                // Dados padrão
+                this.settings = {
+                    speechRate: 1.0,
+                    speechVolume: 1.0,
+                    highContrast: false,
+                    largeIcons: false,
+                    soundFeedback: true
+                };
+                this.icons = {};
+                this.usage = {};
+            }
+        } catch (error) {
+            console.warn('Erro ao carregar dados, usando padrões:', error);
+            // Dados padrão em caso de erro
+            this.users = [{
+                id: 1,
+                username: 'admin',
+                password: 'admin123',
+                name: 'Administrador',
+                email: 'admin@conecta.com',
+                type: 'admin',
+                active: true
+            }];
+            this.settings = {
+                speechRate: 1.0,
+                speechVolume: 1.0,
+                highContrast: false,
+                largeIcons: false,
+                soundFeedback: true
+            };
+            this.icons = {};
+            this.usage = {};
+        }
+    }
+
     setupProfileEventListeners() {
         const photoUploadBtn = document.getElementById('photo-upload-btn');
         const photoUploadInput = document.getElementById('photo-upload-input');
@@ -374,76 +464,84 @@ class ConectaAutismo {
         document.getElementById('login-screen').classList.remove('hidden');
     }
 
-    loadUsers() {
-        const users = localStorage.getItem('conecta_users');
-        if (users) {
-            return JSON.parse(users);
-        }
-        
-        // Create default admin user
-        const defaultUsers = [{
-            id: 1,
-            username: 'admin',
-            password: 'admin123',
-            name: 'Administrador',
-            createdAt: new Date().toISOString()
-        }];
-        
-        this.saveUsers(defaultUsers);
-        return defaultUsers;
-    }
-
-    saveUsers(users) {
-        console.log('saveUsers called with:', users);
+    async loadUsers() {
         try {
-            localStorage.setItem('conecta_users', JSON.stringify(users));
-            console.log('Users saved to localStorage successfully');
-            
-            // Verify the save by reading it back
-            const saved = localStorage.getItem('conecta_users');
-            console.log('Verification - data read back from localStorage:', saved);
+            return await supabaseClient.loadUsers();
         } catch (error) {
-            console.error('Error saving users to localStorage:', error);
+            console.error('Erro ao carregar usuários:', error);
+            return supabaseClient.loadUsersFromLocalStorage();
         }
     }
 
-    authenticateUser(username, password) {
-        const user = this.users.find(u => u.username === username && u.password === password);
-        if (user) {
-            this.currentUser = user;
-            localStorage.setItem('conecta_current_user', JSON.stringify(user));
-            return true;
+    async saveUsers(users) {
+        try {
+            await supabaseClient.saveUsers(users);
+            console.log('Usuários salvos no Supabase com sucesso');
+        } catch (error) {
+            console.error('Erro ao salvar usuários no Supabase:', error);
         }
-        return false;
     }
 
-    registerUser(userData) {
-        // Check if username already exists
-        if (this.users.find(u => u.username === userData.username)) {
-            return { success: false, message: 'Nome de usuário já existe' };
+    async authenticateUser(username, password) {
+        try {
+            const user = await supabaseClient.authenticateUser(username, password);
+            if (user) {
+                this.currentUser = user;
+                localStorage.setItem('conecta_current_user', JSON.stringify(user));
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('Erro na autenticação:', error);
+            return false;
         }
+    }
 
-        // Check if passwords match
-        if (userData.password !== userData.confirmPassword) {
-            return { success: false, message: 'Senhas não coincidem' };
+    async registerUser(userData) {
+        try {
+            // Verificar se usuário já existe
+            const existingUsers = await this.loadUsers();
+            if (existingUsers.find(u => u.username === userData.username)) {
+                return { success: false, message: 'Nome de usuário já existe' };
+            }
+
+            // Verificar se senhas coincidem
+            if (userData.password !== userData.confirmPassword) {
+                return { success: false, message: 'Senhas não coincidem' };
+            }
+
+            // Criar novo usuário
+            const newUser = {
+                username: userData.username,
+                password: userData.password,
+                name: userData.name,
+                email: userData.email || '',
+                profilePhoto: null
+            };
+
+            // Salvar no Supabase
+            const success = await supabaseClient.registerUser(newUser);
+            if (success) {
+                this.users.push(newUser);
+                return { success: true, message: 'Conta criada com sucesso!' };
+            } else {
+                return { success: false, message: 'Erro ao criar conta' };
+            }
+        } catch (error) {
+            console.error('Erro ao registrar usuário:', error);
+            return { success: false, message: 'Erro interno. Tente novamente.' };
         }
+    }
 
-        // Create new user
-        const newUser = {
-            id: Date.now(),
-            username: userData.username,
-            password: userData.password,
-            name: userData.name,
-            createdAt: new Date().toISOString()
-        };
-
-        this.users.push(newUser);
-        this.saveUsers(this.users);
+    async logout() {
+        try {
+            if (this.currentUser) {
+                await supabaseService.logActivity(this.currentUser.id, 'logout', 'Logout realizado');
+            }
+        } catch (error) {
+            console.error('Erro ao registrar logout:', error);
+        }
         
-        return { success: true, message: 'Conta criada com sucesso!' };
-    }
-
-    logout() {
         this.currentUser = null;
         localStorage.removeItem('conecta_current_user');
         document.getElementById('main-app').classList.add('hidden');
@@ -518,8 +616,19 @@ class ConectaAutismo {
         return saved ? { ...defaultSettings, ...JSON.parse(saved) } : defaultSettings;
     }
 
-    saveSettings() {
+    async saveSettings() {
+        // Salvar no localStorage como backup
         localStorage.setItem('conecta-settings', JSON.stringify(this.settings));
+        
+        // Salvar no Supabase se usuário estiver logado
+        if (this.currentUser && this.currentUser.username) {
+            try {
+                await supabaseClient.saveSettings(this.currentUser.username, this.settings);
+            } catch (error) {
+                console.error('Erro ao salvar configurações no Supabase:', error);
+            }
+        }
+        
         this.applySettings();
     }
 

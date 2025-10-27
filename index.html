@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#4A90E2">
+    <title>Conecta Autismo</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="assets/icon-192.png">
+    <link rel="apple-touch-icon" href="assets/icon-192.png">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Splash Screen -->
+    <div id="splash-screen" class="splash-screen">
+        <div class="splash-content">
+            <div class="logo">
+                <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="60" cy="60" r="50" fill="#4A90E2"/>
+                    <path d="M40 45 L60 65 L80 45" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="45" cy="75" r="8" fill="white"/>
+                    <circle cx="75" cy="75" r="8" fill="white"/>
+                </svg>
+            </div>
+            <h1 class="splash-title">Conecta Autismo</h1>
+            <p class="splash-subtitle">Comunicação simples e acessível</p>
+            <div class="loading-spinner"></div>
+        </div>
+    </div>
+
+    <!-- Login Screen -->
+    <div id="login-screen" class="login-screen hidden">
+        <div class="login-container">
+            <div class="login-header">
+                <div class="login-logo">🧩</div>
+                <h2>Conecta Autismo</h2>
+                <p>Acesso para Pais e Cuidadores</p>
+            </div>
+            
+            <form id="login-form" class="login-form">
+                <div class="form-group">
+                    <label for="username">Usuário:</label>
+                    <input type="text" id="username" name="username" required 
+                           placeholder="Digite seu usuário" autocomplete="username">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Senha:</label>
+                    <input type="password" id="password" name="password" required 
+                           placeholder="Digite sua senha" autocomplete="current-password">
+                </div>
+                
+                <button type="submit" class="login-btn">
+                    <span class="btn-text">Entrar</span>
+                    <span class="btn-loading hidden">Entrando...</span>
+                </button>
+                
+                <div class="login-error hidden" id="login-error">
+                    Usuário ou senha incorretos
+                </div>
+            </form>
+            
+            <div class="login-footer">
+                <p>Entre com suas credenciais fornecidas pelo administrador</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="main-app" class="main-app hidden">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="logo-small">
+                    <svg width="40" height="40" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="60" cy="60" r="50" fill="#4A90E2"/>
+                        <path d="M40 45 L60 65 L80 45" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="45" cy="75" r="8" fill="white"/>
+                        <circle cx="75" cy="75" r="8" fill="white"/>
+                    </svg>
+                </div>
+                <h1 class="app-title">Conecta Autismo</h1>
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <img id="header-profile-photo" src="" alt="Foto de Perfil" class="header-photo hidden">
+                        <div id="header-photo-placeholder" class="header-photo-placeholder">👤</div>
+                    </div>
+                    <span id="user-name">Usuário</span>
+                    <button id="settings-btn" class="settings-btn" aria-label="Configurações">⚙️</button>
+                    <button id="logout-btn" class="logout-btn" title="Sair">🚪</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Categories Navigation -->
+        <nav class="categories-nav">
+            <div class="categories-container">
+                <button class="category-btn active" data-category="sentimentos">
+                    <span class="category-icon">😊</span>
+                    <span class="category-text">Sentimentos</span>
+                </button>
+                <button class="category-btn" data-category="necessidades">
+                    <span class="category-icon">🍽️</span>
+                    <span class="category-text">Necessidades</span>
+                </button>
+                <button class="category-btn" data-category="comida">
+                    <span class="category-icon">🍎</span>
+                    <span class="category-text">Comida</span>
+                </button>
+                <button class="category-btn" data-category="cores">
+                    <span class="category-icon">🎨</span>
+                    <span class="category-text">Cores</span>
+                </button>
+                <button class="category-btn" data-category="alfabeto">
+                    <span class="category-icon">🔤</span>
+                    <span class="category-text">Alfabeto</span>
+                </button>
+                <button class="category-btn" data-category="familia">
+                    <span class="category-icon">👨‍👩‍👧‍👦</span>
+                    <span class="category-text">Família</span>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Icons Grid -->
+        <main class="icons-container">
+            <div id="icons-grid" class="icons-grid">
+                <!-- Icons will be dynamically loaded here -->
+            </div>
+        </main>
+
+        <!-- Feedback Modal -->
+        <div id="feedback-modal" class="feedback-modal hidden">
+            <div class="feedback-content">
+                <div class="feedback-icon"></div>
+                <div class="feedback-text"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Panel -->
+    <div id="settings-panel" class="settings-panel hidden">
+        <div class="settings-content">
+            <div class="settings-header">
+                <h2>Configurações dos Pais</h2>
+                <button id="close-settings" class="close-btn">×</button>
+            </div>
+            
+            <div class="settings-tabs">
+                <button class="tab-btn active" data-tab="icons">Ícones</button>
+                <button class="tab-btn" data-tab="profile">Perfil</button>
+                <button class="tab-btn" data-tab="users">Usuários</button>
+                <button class="tab-btn" data-tab="voice">Voz</button>
+                <button class="tab-btn" data-tab="accessibility">Acessibilidade</button>
+                <button class="tab-btn" data-tab="reports">Relatórios</button>
+                <button class="tab-btn" data-tab="support">Suporte</button>
+            </div>
+
+            <div class="settings-body">
+                <!-- Icons Management Tab -->
+                <div id="icons-tab" class="tab-content active">
+                    <h3>Gerenciar Ícones</h3>
+                    <div class="icon-management">
+                        <button id="add-icon-btn" class="add-btn">+ Adicionar Novo Ícone</button>
+                        <div id="icons-list" class="icons-list">
+                            <!-- Dynamic content -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Tab -->
+                <div id="profile-tab" class="tab-content">
+                    <h3>Configurações de Perfil</h3>
+                    
+                    <form id="profile-form" class="profile-form">
+                        <div class="profile-photo-section">
+                            <div class="current-photo">
+                                <img id="profile-photo" src="" alt="Foto de Perfil" class="profile-photo hidden">
+                                <div class="photo-placeholder" id="photo-placeholder">
+                                    <span>👤</span>
+                                    <p>Sem foto</p>
+                                </div>
+                            </div>
+                            <div class="photo-controls">
+                                <input type="file" id="photo-input" accept="image/*" style="display: none;">
+                                <button type="button" id="upload-photo-btn" class="btn-secondary">
+                                    📷 Escolher Foto
+                                </button>
+                                <button type="button" id="remove-photo-btn" class="btn-danger hidden">
+                                    🗑️ Remover Foto
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="profile-name">Nome Completo:</label>
+                                <input type="text" id="profile-name" name="name" required 
+                                       placeholder="Digite seu nome completo">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="profile-email">E-mail:</label>
+                                <input type="email" id="profile-email" name="email" 
+                                       placeholder="Digite seu e-mail">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="profile-username">Usuário:</label>
+                                <input type="text" id="profile-username" name="username" required 
+                                       placeholder="Nome de usuário" readonly>
+                                <small>O nome de usuário não pode ser alterado</small>
+                            </div>
+                        </div>
+
+                        <div class="password-section">
+                            <h4>Alterar Senha</h4>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="current-password">Senha Atual:</label>
+                                    <input type="password" id="current-password" name="currentPassword" 
+                                           placeholder="Digite sua senha atual">
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="new-password">Nova Senha:</label>
+                                    <input type="password" id="new-password" name="newPassword" 
+                                           placeholder="Digite a nova senha">
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="confirm-new-password">Confirmar Nova Senha:</label>
+                                    <input type="password" id="confirm-new-password" name="confirmNewPassword" 
+                                           placeholder="Confirme a nova senha">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary">
+                                <span class="btn-text">💾 Salvar Alterações</span>
+                                <span class="btn-loading hidden">Salvando...</span>
+                            </button>
+                        </div>
+
+                        <div class="profile-success hidden" id="profile-success">
+                            Perfil atualizado com sucesso!
+                        </div>
+
+                        <div class="profile-error hidden" id="profile-error">
+                            Erro ao atualizar perfil
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Users Management Tab -->
+                <div id="users-tab" class="tab-content">
+                    <h3>Administração de Usuários</h3>
+                    
+                    <div class="users-management">
+                        <div class="users-header">
+                            <button id="add-user-btn" class="btn-primary">
+                                👤 Criar Novo Usuário
+                            </button>
+                        </div>
+                        
+                        <div class="users-list" id="users-list">
+                            <!-- Lista de usuários será carregada dinamicamente -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Voice Settings Tab -->
+                <div id="voice-tab" class="tab-content">
+                    <h3>Configurações de Voz</h3>
+                    <div class="voice-settings">
+                        <label>
+                            Velocidade da Fala:
+                            <input type="range" id="speech-rate" min="0.5" max="2" step="0.1" value="1">
+                            <span id="rate-value">1.0</span>
+                        </label>
+                        <label>
+                            Volume:
+                            <input type="range" id="speech-volume" min="0" max="1" step="0.1" value="1">
+                            <span id="volume-value">100%</span>
+                        </label>
+                        <button id="test-voice" class="test-btn">Testar Voz</button>
+                    </div>
+                </div>
+
+                <!-- Accessibility Tab -->
+                <div id="accessibility-tab" class="tab-content">
+                    <h3>Acessibilidade</h3>
+                    <div class="accessibility-settings">
+                        <label class="switch">
+                            <input type="checkbox" id="high-contrast">
+                            <span class="slider"></span>
+                            Alto Contraste
+                        </label>
+                        <label class="switch">
+                            <input type="checkbox" id="large-icons">
+                            <span class="slider"></span>
+                            Ícones Grandes
+                        </label>
+                        <label class="switch">
+                            <input type="checkbox" id="sound-feedback">
+                            <span class="slider"></span>
+                            Feedback Sonoro
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Reports Tab -->
+                <div id="reports-tab" class="tab-content">
+                    <h3>Relatórios de Uso</h3>
+                    <div class="reports-container">
+                        <div class="report-summary">
+                            <div class="stat-card">
+                                <h4>Hoje</h4>
+                                <p id="today-usage">0 interações</p>
+                            </div>
+                            <div class="stat-card">
+                                <h4>Esta Semana</h4>
+                                <p id="week-usage">0 interações</p>
+                            </div>
+                            <div class="stat-card">
+                                <h4>Categoria Favorita</h4>
+                                <p id="favorite-category">-</p>
+                            </div>
+                        </div>
+                        <button id="export-report" class="export-btn">Exportar Relatório</button>
+                    </div>
+                </div>
+
+                <!-- Support Tab -->
+                <div id="support-tab" class="tab-content">
+                    <h3>Suporte</h3>
+                    <div class="support-options">
+                        <button class="support-btn" onclick="window.open('mailto:suporte@conectaautismo.com')">
+                            📧 Enviar E-mail
+                        </button>
+                        <button class="support-btn" onclick="window.open('https://wa.me/5511999999999')">
+                            📱 WhatsApp
+                        </button>
+                        <button class="support-btn" id="show-faq">
+                            ❓ FAQ
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Icon Modal -->
+    <div id="add-icon-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Adicionar Novo Ícone</h3>
+                <button class="close-btn" onclick="closeAddIconModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="add-icon-form">
+                    <label>
+                        Categoria:
+                        <select id="icon-category" required>
+                            <option value="sentimentos">Sentimentos</option>
+                            <option value="necessidades">Necessidades</option>
+                            <option value="comida">Comida</option>
+                            <option value="cores">Cores</option>
+                            <option value="alfabeto">Alfabeto</option>
+                            <option value="familia">Família</option>
+                        </select>
+                    </label>
+                    <label>
+                        Texto/Frase:
+                        <input type="text" id="icon-text" required placeholder="Ex: Estou feliz">
+                    </label>
+                    <label>
+                        Emoji/Ícone:
+                        <input type="text" id="icon-emoji" required placeholder="😊">
+                    </label>
+                    <div class="modal-actions">
+                        <button type="button" onclick="closeAddIconModal()">Cancelar</button>
+                        <button type="submit">Adicionar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add User Modal -->
+    <div id="add-user-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Criar Novo Usuário</h3>
+                <button class="close-btn" onclick="closeAddUserModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="add-user-form">
+                    <label>
+                        Nome Completo:
+                        <input type="text" id="user-name" required placeholder="Digite o nome completo">
+                    </label>
+                    <label>
+                        Nome de Usuário:
+                        <input type="text" id="user-username" required placeholder="Digite o nome de usuário">
+                    </label>
+                    <label>
+                        E-mail:
+                        <input type="email" id="user-email" placeholder="Digite o e-mail (opcional)">
+                    </label>
+                    <label>
+                        Senha:
+                        <input type="password" id="user-password" required placeholder="Digite a senha">
+                    </label>
+                    <label>
+                        Confirmar Senha:
+                        <input type="password" id="user-confirm-password" required placeholder="Confirme a senha">
+                    </label>
+                    <label>
+                        Tipo de Usuário:
+                        <select id="user-type" required>
+                            <option value="user">Usuário</option>
+                            <option value="admin">Administrador</option>
+                        </select>
+                    </label>
+                    <div class="modal-actions">
+                        <button type="button" onclick="closeAddUserModal()">Cancelar</button>
+                        <button type="submit">Criar Usuário</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

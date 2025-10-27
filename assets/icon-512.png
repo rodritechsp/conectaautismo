@@ -1,0 +1,47 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="256" fill="#4A90E2"/>
+  
+  <!-- Gradient overlay -->
+  <defs>
+    <radialGradient id="grad1" cx="50%" cy="30%" r="70%">
+      <stop offset="0%" style="stop-color:rgba(255,255,255,0.2);stop-opacity:1" />
+      <stop offset="100%" style="stop-color:rgba(255,255,255,0);stop-opacity:1" />
+    </radialGradient>
+  </defs>
+  <circle cx="256" cy="256" r="256" fill="url(#grad1)"/>
+  
+  <!-- Main communication symbol -->
+  <circle cx="256" cy="256" r="180" fill="white" fill-opacity="0.1" stroke="white" stroke-width="4"/>
+  
+  <!-- Communication arrows/paths -->
+  <path d="M160 180 L256 260 L352 180" stroke="white" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M160 300 L256 220 L352 300" stroke="white" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Connection nodes -->
+  <circle cx="180" cy="320" r="24" fill="white"/>
+  <circle cx="256" cy="340" r="24" fill="white"/>
+  <circle cx="332" cy="320" r="24" fill="white"/>
+  
+  <!-- Connecting network -->
+  <line x1="180" y1="320" x2="256" y2="340" stroke="white" stroke-width="8" stroke-linecap="round"/>
+  <line x1="256" y1="340" x2="332" y2="320" stroke="white" stroke-width="8" stroke-linecap="round"/>
+  <line x1="180" y1="320" x2="332" y2="320" stroke="white" stroke-width="6" stroke-linecap="round" opacity="0.7"/>
+  
+  <!-- Central heart for emotional connection -->
+  <path d="M256 120 C240 96, 208 96, 208 136 C208 176, 256 220, 256 220 C256 220, 304 176, 304 136 C304 96, 272 96, 256 120 Z" fill="white"/>
+  
+  <!-- Accessibility symbols -->
+  <circle cx="140" cy="200" r="16" fill="white" opacity="0.8"/>
+  <circle cx="372" cy="200" r="16" fill="white" opacity="0.8"/>
+  <circle cx="140" cy="280" r="16" fill="white" opacity="0.8"/>
+  <circle cx="372" cy="280" r="16" fill="white" opacity="0.8"/>
+  
+  <!-- Brand text curve (optional) -->
+  <path id="curve" d="M 100 400 Q 256 350 412 400" stroke="none" fill="none"/>
+  <text font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="white" opacity="0.9">
+    <textPath href="#curve" startOffset="50%" text-anchor="middle">
+      CONECTA AUTISMO
+    </textPath>
+  </text>
+</svg>

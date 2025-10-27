@@ -1,0 +1,61 @@
+{
+  "name": "Conecta Autismo",
+  "short_name": "ConectaAutismo",
+  "description": "Aplicativo de comunicação para crianças autistas não verbais",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F8F9FA",
+  "theme_color": "#4A90E2",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "pt-BR",
+  "categories": ["education", "health", "accessibility"],
+  "icons": [
+    {
+      "src": "assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Sentimentos",
+      "short_name": "Sentimentos",
+      "description": "Acesso rápido aos ícones de sentimentos",
+      "url": "/?category=sentimentos",
+      "icons": [
+        {
+          "src": "assets/icon-192.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Necessidades",
+      "short_name": "Necessidades",
+      "description": "Acesso rápido aos ícones de necessidades básicas",
+      "url": "/?category=necessidades",
+      "icons": [
+        {
+          "src": "assets/icon-192.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "screenshots": [],
+  "prefer_related_applications": false,
+  "related_applications": [],
+  "features": [
+    "Cross Platform",
+    "fast",
+    "simple"
+  ]
+}

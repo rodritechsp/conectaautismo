@@ -16,8 +16,8 @@ const SUPABASE_CONFIG = {
         activities: 'conecta_activities'
     },
     
-    // Modo demonstração (será desativado após configuração automática)
-    demoMode: false
+    // Modo demonstração (ativado para evitar erros de API key inválida)
+    demoMode: true
 };
 
 // 🎯 INSTRUÇÕES SIMPLES PARA ATIVAR O SUPABASE REAL:
